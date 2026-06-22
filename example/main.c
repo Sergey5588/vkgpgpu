@@ -1,7 +1,9 @@
-#include "../src/vkgpgpu.h"
+#include "../include/vkgpgpu.h"
 
 
 int main() {
-	GpuContext ctx = gpu_init_context();
+	GpuContext ctx = gpu_ctx_init();
+
+	gpu_ctx_destroy(&ctx);
 	return 0;
 }

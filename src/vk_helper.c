@@ -1,0 +1,36 @@
+#include "vk_helper.h"
+#define STR_CASE(r) case r: return #r
+const char* vk_result_to_str(VkResult result) {
+    switch (result) {
+        STR_CASE(VK_SUCCESS);
+        STR_CASE(VK_NOT_READY);
+        STR_CASE(VK_TIMEOUT);
+        STR_CASE(VK_EVENT_SET);
+        STR_CASE(VK_EVENT_RESET);
+        STR_CASE(VK_INCOMPLETE);
+        
+        // Core errors
+        STR_CASE(VK_ERROR_OUT_OF_HOST_MEMORY);
+        STR_CASE(VK_ERROR_OUT_OF_DEVICE_MEMORY);
+        STR_CASE(VK_ERROR_INITIALIZATION_FAILED);
+        STR_CASE(VK_ERROR_DEVICE_LOST);
+        STR_CASE(VK_ERROR_MEMORY_MAP_FAILED);
+        STR_CASE(VK_ERROR_LAYER_NOT_PRESENT);
+        STR_CASE(VK_ERROR_EXTENSION_NOT_PRESENT);
+        STR_CASE(VK_ERROR_FEATURE_NOT_PRESENT);
+        STR_CASE(VK_ERROR_INCOMPATIBLE_DRIVER);
+        STR_CASE(VK_ERROR_TOO_MANY_OBJECTS);
+        STR_CASE(VK_ERROR_FORMAT_NOT_SUPPORTED);
+        STR_CASE(VK_ERROR_FRAGMENTED_POOL);
+        STR_CASE(VK_ERROR_UNKNOWN);
+
+        // Core GPGPU-relevant extensions / Newer core specs
+        STR_CASE(VK_ERROR_OUT_OF_POOL_MEMORY);
+        STR_CASE(VK_ERROR_INVALID_EXTERNAL_HANDLE);
+        STR_CASE(VK_ERROR_FRAGMENTATION);
+        STR_CASE(VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS);
+        
+        default: return "UNKNOWN_VK_RESULT";
+    }
+}
+#undef STR_CASE
