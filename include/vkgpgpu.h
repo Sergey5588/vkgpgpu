@@ -6,6 +6,8 @@ typedef struct {
 	VkInstance instance;
 	VkPhysicalDevice physicalDevice;
 	VkDevice device;
+	VkQueue queue;
+	uint32_t computeFamilyIndex;
 } GpuContext;
 
 GpuContext gpu_ctx_init();

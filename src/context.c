@@ -3,6 +3,7 @@
 #include "todo.h"
 GpuContext gpu_ctx_init() {
 	GpuContext ctx = {0};
+	//instance
 	VK_CHECK(volkInitialize());
 	VkApplicationInfo appInfo = {
 		.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -16,7 +17,7 @@ GpuContext gpu_ctx_init() {
 	};
 	VK_CHECK(vkCreateInstance(&instanceCI, NULL, &ctx.instance));
 	volkLoadInstance(ctx.instance);
-	
+	//device loading
 	uint32_t physicalDeviceCount = 0;
 	VK_CHECK(vkEnumeratePhysicalDevices(ctx.instance, &physicalDeviceCount,0));
 	if(physicalDeviceCount == 0) {
@@ -26,7 +27,7 @@ GpuContext gpu_ctx_init() {
 	VkPhysicalDevice* const physicalDevices = malloc(sizeof(VkPhysicalDevice)*physicalDeviceCount);
 	VK_CHECK(vkEnumeratePhysicalDevices(ctx.instance, &physicalDeviceCount,physicalDevices));
 	
-	for(uint32_t i= 0; i< physicalDeviceCount; i++) {
+	for(size_t i= 0; i< physicalDeviceCount; i++) {
 		VkPhysicalDeviceProperties2 deviceProperties = { .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};
 		VkPhysicalDevice pDevice = physicalDevices[i];
 		vkGetPhysicalDeviceProperties2(pDevice, &deviceProperties);
@@ -43,6 +44,46 @@ GpuContext gpu_ctx_init() {
 	vkGetPhysicalDeviceProperties2(ctx.physicalDevice, &deviceProperties);
 	printf("Running on: %s\n", deviceProperties.properties.deviceName);
 	free(physicalDevices);
+	//queue setup
+	uint32_t queueFamilyPropertiesCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(ctx.physicalDevice,&queueFamilyPropertiesCount, 0);
+	VkQueueFamilyProperties* const queueFamilyProperties = malloc(sizeof(VkQueueFamilyProperties)*queueFamilyPropertiesCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(ctx.physicalDevice,&queueFamilyPropertiesCount, queueFamilyProperties);
+	ctx.computeFamilyIndex = UINT32_MAX;
+	for(size_t i = 0; i<queueFamilyPropertiesCount; i++) {
+		if(queueFamilyProperties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) {
+			if(!(queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
+				ctx.computeFamilyIndex = i;
+				break;
+			}
+		}
+	}
+	if(ctx.computeFamilyIndex == UINT32_MAX) {
+		for(size_t i = 0; i<queueFamilyPropertiesCount; i++) {
+			if(queueFamilyProperties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) {
+				ctx.computeFamilyIndex = i;
+				break;
+			}
+		}
+	}
+	const float queuePriority = 1.0f;
+	VkDeviceQueueCreateInfo queueCI = {
+		.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+		.queueFamilyIndex = ctx.computeFamilyIndex,
+		.queueCount = 1,
+		.pQueuePriorities = &queuePriority
+	};
+	VkDeviceCreateInfo deviceCI = {
+		.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+		.queueCreateInfoCount = 1,
+		.pQueueCreateInfos = &queueCI,
+	};
+	//create logical device
+	VK_CHECK(vkCreateDevice(ctx.physicalDevice,&deviceCI,NULL,&ctx.device));
+	volkLoadDevice(ctx.device);
+	//create queue
+	vkGetDeviceQueue(ctx.device,ctx.computeFamilyIndex,0, &ctx.queue);
+	
 	return ctx;
 }
 
