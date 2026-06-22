@@ -1,14 +1,14 @@
 #!/bin/sh
 TARGET="app"
-CFLAGS=" -std=c11 "
+CFLAGS="-std=c11"
 build() {
 
-		cc $CFLAGS */*.c -o $TARGET
+		cc "$CFLAGS" ./*/*.c -o $TARGET
 }
 
 
 ACTION="$1"
-if [[ -z "$ACTION" ]]; then
+if [ -z "$ACTION" ]; then
 	ACTION="build"
 fi
 
