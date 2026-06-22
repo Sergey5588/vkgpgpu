@@ -1,4 +1,4 @@
-# vkgpgpu
+# VKGPGPU
 A minimalist, lightweight framework for general-purpose computing on the GPU, written in pure C11 and Vulkan.
 ## Features
 
@@ -12,5 +12,4 @@ A minimalist, lightweight framework for general-purpose computing on the GPU, wr
 - VulkanSDK: vulkan headers and etc.
 - Any C11 compliant C compiler (gcc, clang, MSVC)
 - Any SPIR-V compiler
-
 
