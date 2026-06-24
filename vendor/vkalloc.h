@@ -20,11 +20,14 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
+/* Modified version:
+   - Replaced inclusion of <vulkan.h> with inclusion of "volk.h"
+   Original file copyright: Leon Marz <main@lmarz.org>
+*/
 #ifndef VKALLOC_H
 #define VKALLOC_H
 
-#include <vulkan/vulkan.h>
-
+#include "volk.h"
 
 enum mem_type {
 	MEM_TYPE_STAGING, /* Memory that is accessible from the CPU and GPU */
