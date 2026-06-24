@@ -1,7 +1,10 @@
 #ifndef __VKGPGPU_H
 #define __VKGPGPU_H 1
-#include "../vendor/volk.h"
-
+#include <vulkan/vulkan.h>
+typedef struct {
+	VkBuffer buffer;
+	uint32_t size;
+} GpuBuffer;
 typedef struct {
 	VkInstance instance;
 	VkPhysicalDevice physicalDevice;
