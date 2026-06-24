@@ -1,4 +1,5 @@
 #include "../vendor/volk.h"
+#include "vk_helper.h"
 #include "../include/vkgpgpu.h"
 
 #include "../vendor/vkalloc.h"
@@ -27,4 +28,12 @@ void gpu_buf_destroy(GpuBuffer *buf) {
 		vkDestroyBuffer(buf->ctx->device,buf->buffer, NULL);
 	}
 	*buf = (GpuBuffer){0};
+}
+void gpu_buf_map(GpuBuffer *buf, void** data) {
+	if(!buf) return;
+	VK_CHECK(vkalloc_map(buf->alloc, data));
+}
+void gpu_buf_unmap(GpuBuffer *buf) {
+	if(!buf) return;
+	vkalloc_unmap(buf->alloc);
 }
