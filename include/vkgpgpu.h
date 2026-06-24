@@ -13,17 +13,17 @@ typedef struct {
 typedef struct {
 	GpuContext *ctx;
 	VkBuffer buffer;
-	GpuAlloc* alloc;
+	GpuAlloc *alloc;
 	uint64_t size;
 } GpuBuffer;
 
-GpuContext gpu_ctx_init();
+GpuContext* gpu_ctx_init();
 void gpu_ctx_destroy(GpuContext* ctx);
 
 
 
 
-GpuBuffer gpu_buf_create(GpuContext *ctx, uint64_t size, uint8_t type);
+GpuBuffer* gpu_buf_create(GpuContext *ctx, uint64_t size, uint8_t type);
 void gpu_buf_destroy(GpuBuffer *buf);
 void gpu_buf_map(GpuBuffer *buf, void** data);
 void gpu_buf_unmap(GpuBuffer *buf);
