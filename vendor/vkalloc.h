@@ -20,6 +20,12 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
+
+/* Modified version:
+   - Added '#include "volk.h"' in vkalloc.c
+   Original file copyright: Leon Marz <main@lmarz.org>
+*/
+
 #ifndef VKALLOC_H
 #define VKALLOC_H
 
