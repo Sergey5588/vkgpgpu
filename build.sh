@@ -3,7 +3,11 @@ TARGET="app"
 CFLAGS="-std=c11"
 build() {
 
-		cc "$CFLAGS" ./*/*.c -o $TARGET
+	cc "$CFLAGS" ./*/*.c -o $TARGET
+}
+build_debug() {
+
+	cc "$CFLAGS" -g  -O1 -fsanitize=address -fno-omit-frame-pointer -Wall -Wextra ./*/*.c -o $TARGET
 }
 
 
@@ -20,9 +24,12 @@ case "$ACTION" in
 		build
 		./$TARGET
 		;;
+	debug)
+		build_debug
+		;;
 	*)
 		echo "Error: Unknown command '$ACTION'"
-		echo "Usage: $0 [build|run]"
+		echo "Usage: $0 [build|run|debug]"
 		;;
 
 esac
