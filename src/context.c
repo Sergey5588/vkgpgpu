@@ -1,6 +1,8 @@
 #include "../include/vkgpgpu.h"
 #include "vk_helper.h"
 #include "todo.h"
+
+#include "../vendor/vkalloc.h"
 GpuContext gpu_ctx_init() {
 	GpuContext ctx = {0};
 	//instance
@@ -83,10 +85,12 @@ GpuContext gpu_ctx_init() {
 	volkLoadDevice(ctx.device);
 	//create queue
 	vkGetDeviceQueue(ctx.device,ctx.computeFamilyIndex,0, &ctx.queue);
-	
+
+	vkalloc_init(ctx.physicalDevice, ctx.device);
 	return ctx;
 }
 
 void gpu_ctx_destroy(GpuContext* ctx) {
+	vkalloc_destroy();
 	TODO("GPU Context cleanup");
 }
