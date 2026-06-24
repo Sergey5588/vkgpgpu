@@ -1,4 +1,4 @@
-#define _GNU_SOURCE #
+#define _GNU_SOURCE // for usleep
 #include "../include/vkgpgpu.h"
 #include <unistd.h> // for usleep, just for tests
 int main() {
