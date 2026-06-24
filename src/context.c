@@ -88,6 +88,7 @@ GpuContext gpu_ctx_init() {
 	vkGetDeviceQueue(ctx.device,ctx.computeFamilyIndex,0, &ctx.queue);
 
 	vkalloc_init(ctx.physicalDevice, ctx.device);
+	free(queueFamilyProperties);
 	return ctx;
 }
 
