@@ -4,17 +4,26 @@
 #include <stdlib.h>
 #include "vk_helper.h"
 #include <stdarg.h>
+#include "todo.h"
 GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, uint32_t bufferCount, ...) {
+	TODO("Kernel destruction");
 	GpuKernel *kernel = calloc(1, sizeof(GpuKernel));
 	FILE *f = fopen(filename, "rb");
 	if(f == NULL) {
-		fprintf(stderr, "Failed to open file: %s", filename);
+		fprintf(stderr, "Failed to open file: %s\n", filename);
 		return NULL;
 	}
 	fseek(f, 0, SEEK_END);
 	size_t shaderSize = ftell(f);
+	if(shaderSize <= 0 || shaderSize%4 !=0) {
+		fprintf(stderr, "Bad SPIR-V size.\n");
+		fclose(f);
+		return NULL;
+	}
 	uint32_t *shaderCode = malloc(shaderSize);
+	rewind(f);
 	fread(shaderCode, 1,shaderSize,f);
+	printf("First SPIR-V dword: 0x%08x\n", shaderCode[0]);
 	fclose(f);
 	VkShaderModuleCreateInfo shaderCI = {
 		.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
@@ -43,7 +52,7 @@ GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, uint32_t buf
 	VK_CHECK(vkCreateDescriptorSetLayout(ctx->device, &dsLayoutCI, NULL, &dsLayout));
 
 	VkPipelineLayoutCreateInfo pipelineLayoutCI = {
-		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 		.setLayoutCount = 1,
 		.pSetLayouts = &dsLayout
 	};
@@ -58,6 +67,7 @@ GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, uint32_t buf
 			.module = kernel->shaderModule,
 			.pName = "main",
 		},
+		.layout = pipelineLayout
 	};
 	VkPipeline pipeline;
 	VK_CHECK(vkCreateComputePipelines(ctx->device,VK_NULL_HANDLE, 1, &pipelineCI, NULL, &pipeline));
