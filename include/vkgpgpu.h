@@ -8,6 +8,8 @@ typedef struct {
 	VkDevice device;
 	VkQueue queue;
 	uint32_t computeFamilyIndex;
+	VkCommandPool cmdPool;
+	VkCommandBuffer cmdBuffer;
 } GpuContext;
 
 typedef struct {

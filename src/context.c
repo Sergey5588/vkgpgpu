@@ -89,6 +89,18 @@ GpuContext* gpu_ctx_init() {
 
 	vkalloc_init(ctx->physicalDevice, ctx->device);
 	free(queueFamilyProperties);
+	VkCommandPoolCreateInfo cmdPoolCI = {
+		.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+		.queueFamilyIndex = ctx->computeFamilyIndex,
+	};
+	VK_CHECK(vkCreateCommandPool(ctx->device,&cmdPoolCI, NULL,&ctx->cmdPool));
+	VkCommandBufferAllocateInfo cmdBufAllocCI = {
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+		.commandPool = ctx->cmdPool,
+		.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+		.commandBufferCount = 1
+	};
+	VK_CHECK(vkAllocateCommandBuffers(ctx->device, &cmdBufAllocCI, &ctx->cmdBuffer));
 	return ctx;
 }
 
