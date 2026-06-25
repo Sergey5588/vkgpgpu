@@ -17,6 +17,9 @@ typedef struct {
 	uint64_t size;
 } GpuBuffer;
 
+typedef struct {
+	VkShaderModule shaderModule;
+} GpuKernel;
 GpuContext* gpu_ctx_init();
 void gpu_ctx_destroy(GpuContext* ctx);
 
