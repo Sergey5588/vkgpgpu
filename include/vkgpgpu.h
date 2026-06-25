@@ -30,4 +30,7 @@ GpuBuffer* gpu_buf_create(GpuContext *ctx, uint64_t size, uint8_t type);
 void gpu_buf_destroy(GpuBuffer *buf);
 void gpu_buf_map(GpuBuffer *buf, void** data);
 void gpu_buf_unmap(GpuBuffer *buf);
+
+
+GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, uint32_t bufferCount, ...);
 #endif
