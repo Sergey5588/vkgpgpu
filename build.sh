@@ -9,6 +9,9 @@ build_debug() {
 
 	cc "$CFLAGS" -g  -O1 -fsanitize=address -fno-omit-frame-pointer -Wall -Wextra ./*/*.c -o $TARGET
 }
+build_glsl() {
+	glslangValidator -V --target-env vulkan1.3 -S comp shaders/copy.comp -o shaders/copy.comp.spv
+}
 
 
 ACTION="$1"
@@ -27,9 +30,12 @@ case "$ACTION" in
 	debug)
 		build_debug
 		;;
+	glsl)
+		build_glsl
+		;;
 	*)
 		echo "Error: Unknown command '$ACTION'"
-		echo "Usage: $0 [build|run|debug]"
+		echo "Usage: $0 [build|run|debug|glsl]"
 		;;
 
 esac
