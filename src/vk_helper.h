@@ -13,7 +13,7 @@ const char* vk_result_to_str(VkResult result);
     do { \
         VkResult res = (f); \
         if (res != VK_SUCCESS) { \
-            printf("Fatal Vulkan Error at %s:%d: %s\n", __FILE__, __LINE__, vk_result_to_str(res)); \
+            printf("Fatal Vulkan Error at %s:%d: %s (%x)\n", __FILE__, __LINE__, vk_result_to_str(res), res); \
 			abort(); \
         } \
     } while(0)
