@@ -6,7 +6,6 @@
 #include <stdarg.h>
 #include "todo.h"
 GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, uint32_t bufferCount, ...) {
-	TODO("Kernel destruction");
 	GpuKernel *kernel = calloc(1, sizeof(GpuKernel));
 	FILE *f = fopen(filename, "rb");
 	if(f == NULL) {
@@ -100,6 +99,7 @@ GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, uint32_t buf
 						
 		};
 	}
+	va_end(args);
 	VkWriteDescriptorSet writes[bufferCount];
 	for(uint32_t i = 0; i < bufferCount; i++) {
 		writes[i] = (VkWriteDescriptorSet){
@@ -112,5 +112,47 @@ GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, uint32_t buf
 		};
 	}
 	vkUpdateDescriptorSets(ctx->device,bufferCount, writes,0,NULL);
+	va_start(args,bufferCount);
+	kernel->ctx = ctx;
+	kernel->pipeline = pipeline;
+	kernel->pipelineLayout = pipelineLayout;
+	kernel->descriptorSetLayout = dsLayout;
+	kernel->descriptorPool = descriptorPool;
+	kernel->descriptorSet = descriptorSet;
+	kernel->bufferCount = bufferCount;
+	kernel->buffers = calloc(bufferCount, sizeof(GpuBuffer*));
+	for(uint32_t i = 0; i < bufferCount; i++) {
+		kernel->buffers[i] = va_arg(args,GpuBuffer*);
+	}
 	return kernel;
+}
+void gpu_kernel_dispatch(GpuKernel *kernel, uint32_t group_x, uint32_t group_y, uint32_t group_z) {
+	GpuContext *ctx = kernel->ctx;
+	VkCommandBuffer cmdBuffer;
+	VkCommandBufferAllocateInfo cmdBufAllocCI = {
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+		.commandPool =ctx->cmdPool,
+		.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+		.commandBufferCount = 1
+	};
+	VK_CHECK(vkAllocateCommandBuffers(ctx->device, &cmdBufAllocCI, &cmdBuffer));
+	VkCommandBufferBeginInfo beginInfo = {
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO
+	};
+	VK_CHECK(vkBeginCommandBuffer(cmdBuffer, &beginInfo));
+	vkCmdBindPipeline(cmdBuffer,VK_PIPELINE_BIND_POINT_COMPUTE, kernel->pipeline);
+	vkCmdBindDescriptorSets(cmdBuffer,VK_PIPELINE_BIND_POINT_COMPUTE, kernel->pipelineLayout, 0,1,&kernel->descriptorSet,0,NULL);
+	vkCmdDispatch(cmdBuffer, group_x, group_y, group_z);
+	vkEndCommandBuffer(cmdBuffer);
+	VkSubmitInfo submitInfo = {
+		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+		.commandBufferCount = 1,
+		.pCommandBuffers = &cmdBuffer
+	};
+	VK_CHECK(vkQueueSubmit(ctx->queue, 1, &submitInfo,VK_NULL_HANDLE));
+	vkQueueWaitIdle(ctx->queue);
+	vkFreeCommandBuffers(ctx->device, ctx->cmdPool,1,&cmdBuffer);
+}
+void gpu_kernel_destroy(GpuKernel *kernel) {
+	TODO("Kernel destroy");
 }
