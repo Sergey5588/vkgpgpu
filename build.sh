@@ -10,7 +10,7 @@ build_debug() {
 	cc "$CFLAGS" -g  -O1 -fsanitize=address -fno-omit-frame-pointer -Wall -Wextra ./*/*.c -o $TARGET
 }
 build_glsl() {
-	glslangValidator -V --target-env vulkan1.3 -S comp shaders/copy.comp -o shaders/copy.comp.spv
+	glslangValidator -V --target-env vulkan1.3 -S comp shaders/test.comp -o shaders/test.comp.spv
 }
 
 
