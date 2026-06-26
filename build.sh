@@ -25,6 +25,7 @@ case "$ACTION" in
 		;;
 	run)
 		build
+		build_glsl
 		./$TARGET
 		;;
 	debug)
