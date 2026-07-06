@@ -154,5 +154,10 @@ void gpu_kernel_dispatch(GpuKernel *kernel, uint32_t group_x, uint32_t group_y, 
 	vkFreeCommandBuffers(ctx->device, ctx->cmdPool,1,&cmdBuffer);
 }
 void gpu_kernel_destroy(GpuKernel *kernel) {
-	TODO("Kernel destroy");
+	GpuContext *ctx = kernel->ctx;
+	vkDestroyDescriptorSetLayout(ctx->device,kernel->descriptorSetLayout, NULL);
+	vkDestroyDescriptorPool(ctx->device, kernel->descriptorPool, NULL);
+	vkDestroyPipelineLayout(ctx->device, kernel->pipelineLayout, NULL);
+	vkDestroyPipeline(ctx->device, kernel->pipeline, NULL);
+	vkDestroyShaderModule(ctx->device, kernel->shaderModule, NULL);
 }
