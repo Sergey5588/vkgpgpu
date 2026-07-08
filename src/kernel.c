@@ -160,4 +160,5 @@ void gpu_kernel_destroy(GpuKernel *kernel) {
 	vkDestroyPipelineLayout(ctx->device, kernel->pipelineLayout, NULL);
 	vkDestroyPipeline(ctx->device, kernel->pipeline, NULL);
 	vkDestroyShaderModule(ctx->device, kernel->shaderModule, NULL);
+	free(kernel);
 }
