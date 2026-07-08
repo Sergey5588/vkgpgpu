@@ -8,7 +8,7 @@ A minimalist, lightweight framework for general-purpose computing on the GPU, wr
 
 ## Dependencies:
 - [volk.h](https://github.com/zeux/volk): vulkan loading at runtime (included in `vendor/`)
-- [vkalloc](https://sr.ht/~lmarz/vkalloc/): simple vulkan memory allocator
+- [vkalloc](https://sr.ht/~lmarz/vkalloc/): simple vulkan memory allocator (included in `vendor/`)
 - VulkanSDK: vulkan headers and etc.
 - Any C11 compliant C compiler (gcc, clang, MSVC)
 - Any SPIR-V compiler
