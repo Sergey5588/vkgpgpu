@@ -4,9 +4,12 @@
 #include <stdlib.h>
 #include "vk_helper.h"
 #include <stdarg.h>
+#include <string.h>
 #include "todo.h"
+
 GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, uint32_t bufferCount, ...) {
 	GpuKernel *kernel = calloc(1, sizeof(GpuKernel));
+	gpu_kernel_push_ex(kernel, &(uint32_t){3}, sizeof(uint32_t));
 	FILE *f = fopen(filename, "rb");
 	if(f == NULL) {
 		fprintf(stderr, "Failed to open file: %s\n", filename);
@@ -49,11 +52,17 @@ GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, uint32_t buf
 	};
 	VkDescriptorSetLayout dsLayout;
 	VK_CHECK(vkCreateDescriptorSetLayout(ctx->device, &dsLayoutCI, NULL, &dsLayout));
-
+	VkPushConstantRange pushConstantRange = {
+		.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,
+		.offset = 0,
+		.size = kernel->consts.size,
+	};
 	VkPipelineLayoutCreateInfo pipelineLayoutCI = {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 		.setLayoutCount = 1,
-		.pSetLayouts = &dsLayout
+		.pSetLayouts = &dsLayout,
+		.pushConstantRangeCount = 1,
+		.pPushConstantRanges = &pushConstantRange,
 	};
 	VkPipelineLayout pipelineLayout;
 	VK_CHECK(vkCreatePipelineLayout(ctx->device, &pipelineLayoutCI, NULL, &pipelineLayout));
@@ -142,6 +151,7 @@ void gpu_kernel_dispatch(GpuKernel *kernel, uint32_t group_x, uint32_t group_y, 
 	VK_CHECK(vkBeginCommandBuffer(cmdBuffer, &beginInfo));
 	vkCmdBindPipeline(cmdBuffer,VK_PIPELINE_BIND_POINT_COMPUTE, kernel->pipeline);
 	vkCmdBindDescriptorSets(cmdBuffer,VK_PIPELINE_BIND_POINT_COMPUTE, kernel->pipelineLayout, 0,1,&kernel->descriptorSet,0,NULL);
+	vkCmdPushConstants(cmdBuffer, kernel->pipelineLayout,VK_SHADER_STAGE_COMPUTE_BIT, 0, kernel->consts.size, kernel->consts.data);
 	vkCmdDispatch(cmdBuffer, group_x, group_y, group_z);
 	vkEndCommandBuffer(cmdBuffer);
 	VkSubmitInfo submitInfo = {
@@ -160,5 +170,17 @@ void gpu_kernel_destroy(GpuKernel *kernel) {
 	vkDestroyPipelineLayout(ctx->device, kernel->pipelineLayout, NULL);
 	vkDestroyPipeline(ctx->device, kernel->pipeline, NULL);
 	vkDestroyShaderModule(ctx->device, kernel->shaderModule, NULL);
+	if(kernel->consts.data) free(kernel->consts.data);
 	free(kernel);
+}
+void gpu_kernel_push_ex(GpuKernel* kernel, void* data, size_t size) {
+	TODO("Better push constant API");
+	if(size <= 0) return;
+	if(kernel->consts.size == 0) {
+		kernel->consts.data = malloc(size);
+	} else {
+		kernel->consts.data = realloc(kernel->consts.data, kernel->consts.size+size);
+	}
+	memcpy((uint8_t*)kernel->consts.data, data, size);
+	kernel->consts.size += size;
 }
