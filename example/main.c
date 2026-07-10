@@ -5,7 +5,7 @@ int main() {
 	GpuBuffer *buf1 = gpu_buf_create(ctx, 1337*sizeof(float), 0);
 	GpuBuffer *buf2 = gpu_buf_create(ctx, 1337*sizeof(float), 0);
 	GpuConsts consts = {0};
-	GPU_CONST_PUSH(&consts, 1.0f);
+	GPU_CONST_PUSH(&consts, 1.5f);
 	float *data1;
 	float *data2;
 
