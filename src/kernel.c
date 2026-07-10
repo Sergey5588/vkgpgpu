@@ -7,9 +7,9 @@
 #include <string.h>
 #include "todo.h"
 
-GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, uint32_t bufferCount, ...) {
+GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, GpuConsts consts, uint32_t bufferCount, ...) {
 	GpuKernel *kernel = calloc(1, sizeof(GpuKernel));
-	gpu_kernel_push_ex(kernel, &(uint32_t){3}, sizeof(uint32_t));
+	kernel->consts = consts;
 	FILE *f = fopen(filename, "rb");
 	if(f == NULL) {
 		fprintf(stderr, "Failed to open file: %s\n", filename);
@@ -173,14 +173,19 @@ void gpu_kernel_destroy(GpuKernel *kernel) {
 	if(kernel->consts.data) free(kernel->consts.data);
 	free(kernel);
 }
-void gpu_kernel_push_ex(GpuKernel* kernel, void* data, size_t size) {
+void gpu_const_push_ex(GpuConsts *consts, void* data, size_t size, size_t alignment) {
 	TODO("Better push constant API");
+	size_t offset = (consts->size + (alignment-1))&~(alignment-1);
 	if(size <= 0) return;
-	if(kernel->consts.size == 0) {
-		kernel->consts.data = malloc(size);
-	} else {
-		kernel->consts.data = realloc(kernel->consts.data, kernel->consts.size+size);
+	if(consts->size+size+offset > 128) {
+		fprintf(stderr, "Push constants limit exceeded. Max: 128 bytes, Requested: %zu bytes", consts->size+offset+size);
+		return;
 	}
-	memcpy((uint8_t*)kernel->consts.data, data, size);
-	kernel->consts.size += size;
+	if(consts->size == 0) {
+		consts->data = malloc(offset+size);
+	} else {
+		consts->data = realloc(consts->data, consts->size+size+offset);
+	}
+	memcpy(((uint8_t*)consts->data+offset), data, size);
+	consts->size += (size+offset);
 }
