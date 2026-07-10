@@ -174,7 +174,6 @@ void gpu_kernel_destroy(GpuKernel *kernel) {
 	free(kernel);
 }
 void gpu_const_push_ex(GpuConsts *consts, void* data, size_t size, size_t alignment) {
-	TODO("Better push constant API");
 	size_t offset = (consts->size + (alignment-1))&~(alignment-1);
 	if(size <= 0) return;
 	if(consts->size+size+offset > 128) {
