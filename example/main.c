@@ -23,7 +23,7 @@ int main() {
 
 
 	//cleanup
-	gpu_program_destroy(k);
+	gpu_program_destroy(p);
 	gpu_buf_destroy(buf1);
 	gpu_buf_destroy(buf2);
 	gpu_ctx_destroy(ctx);
