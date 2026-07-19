@@ -94,6 +94,24 @@ GpuContext* gpu_ctx_init() {
 		.queueFamilyIndex = ctx->computeFamilyIndex,
 	};
 	VK_CHECK(vkCreateCommandPool(ctx->device,&cmdPoolCI, NULL,&ctx->cmdPool));
+
+	VkDescriptorPoolSize poolSizes[] = {
+		{
+			.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = GPU_MAX_STORAGE_DESCRIPTORS,
+		},
+		{
+			.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			.descriptorCount = GPU_MAX_UNIFORM_DESCRIPTORS,
+		}
+	};
+	VkDescriptorPoolCreateInfo poolCI = {
+		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+		.maxSets = GPU_MAX_DESCRIPTOR_SETS,
+		.poolSizeCount = sizeof(poolSizes)/sizeof(poolSizes[0]),
+		.pPoolSizes = poolSizes,
+	};
+	VK_CHECK(vkCreateDescriptorPool(ctx->device, &poolCI, NULL, &ctx->descriptorPool));
 	return ctx;
 }
 
