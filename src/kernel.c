@@ -7,9 +7,9 @@
 #include <string.h>
 #include "todo.h"
 
-GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, GpuConsts consts, uint32_t bufferCount, ...) {
-	GpuKernel *kernel = calloc(1, sizeof(GpuKernel));
-	kernel->consts = consts;
+GpuProgram* gpu_program_create(GpuContext *ctx, const char* filename, GpuConsts consts, uint32_t bufferCount, ...) {
+	GpuProgram *program = calloc(1, sizeof(GpuProgram));
+	program->consts = consts;
 	FILE *f = fopen(filename, "rb");
 	if(f == NULL) {
 		fprintf(stderr, "Failed to open file: %s\n", filename);
@@ -32,7 +32,7 @@ GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, GpuConsts co
 		.codeSize = shaderSize, 
 		.pCode = shaderCode,
 	};
-	VK_CHECK(vkCreateShaderModule(ctx->device, &shaderCI, NULL, &kernel->shaderModule));
+	VK_CHECK(vkCreateShaderModule(ctx->device, &shaderCI, NULL, &program->shaderModule));
 	free(shaderCode);
 	va_list args;
 	va_start(args,bufferCount);
@@ -55,7 +55,7 @@ GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, GpuConsts co
 	VkPushConstantRange pushConstantRange = {
 		.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,
 		.offset = 0,
-		.size = kernel->consts.size,
+		.size = program->consts.size,
 	};
 	VkPipelineLayoutCreateInfo pipelineLayoutCI = {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
@@ -72,7 +72,7 @@ GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, GpuConsts co
 		.stage = {
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
 			.stage = VK_SHADER_STAGE_COMPUTE_BIT,
-			.module = kernel->shaderModule,
+			.module = program->shaderModule,
 			.pName = "main",
 		},
 		.layout = pipelineLayout
@@ -122,21 +122,21 @@ GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, GpuConsts co
 	}
 	vkUpdateDescriptorSets(ctx->device,bufferCount, writes,0,NULL);
 	va_start(args,bufferCount);
-	kernel->ctx = ctx;
-	kernel->pipeline = pipeline;
-	kernel->pipelineLayout = pipelineLayout;
-	kernel->descriptorSetLayout = dsLayout;
-	kernel->descriptorPool = descriptorPool;
-	kernel->descriptorSet = descriptorSet;
-	kernel->bufferCount = bufferCount;
-	kernel->buffers = calloc(bufferCount, sizeof(GpuBuffer*));
+	program->ctx = ctx;
+	program->pipeline = pipeline;
+	program->pipelineLayout = pipelineLayout;
+	program->descriptorSetLayout = dsLayout;
+	program->descriptorPool = descriptorPool;
+	program->descriptorSet = descriptorSet;
+	program->bufferCount = bufferCount;
+	program->buffers = calloc(bufferCount, sizeof(GpuBuffer*));
 	for(uint32_t i = 0; i < bufferCount; i++) {
-		kernel->buffers[i] = va_arg(args,GpuBuffer*);
+		program->buffers[i] = va_arg(args,GpuBuffer*);
 	}
-	return kernel;
+	return program;
 }
-void gpu_kernel_dispatch(GpuKernel *kernel, uint32_t group_x, uint32_t group_y, uint32_t group_z) {
-	GpuContext *ctx = kernel->ctx;
+void gpu_program_dispatch(GpuProgram *program, uint32_t group_x, uint32_t group_y, uint32_t group_z) {
+	GpuContext *ctx = program->ctx;
 	VkCommandBuffer cmdBuffer;
 	VkCommandBufferAllocateInfo cmdBufAllocCI = {
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
@@ -149,9 +149,9 @@ void gpu_kernel_dispatch(GpuKernel *kernel, uint32_t group_x, uint32_t group_y, 
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO
 	};
 	VK_CHECK(vkBeginCommandBuffer(cmdBuffer, &beginInfo));
-	vkCmdBindPipeline(cmdBuffer,VK_PIPELINE_BIND_POINT_COMPUTE, kernel->pipeline);
-	vkCmdBindDescriptorSets(cmdBuffer,VK_PIPELINE_BIND_POINT_COMPUTE, kernel->pipelineLayout, 0,1,&kernel->descriptorSet,0,NULL);
-	vkCmdPushConstants(cmdBuffer, kernel->pipelineLayout,VK_SHADER_STAGE_COMPUTE_BIT, 0, kernel->consts.size, kernel->consts.data);
+	vkCmdBindPipeline(cmdBuffer,VK_PIPELINE_BIND_POINT_COMPUTE, program->pipeline);
+	vkCmdBindDescriptorSets(cmdBuffer,VK_PIPELINE_BIND_POINT_COMPUTE, program->pipelineLayout, 0,1,&program->descriptorSet,0,NULL);
+	vkCmdPushConstants(cmdBuffer, program->pipelineLayout,VK_SHADER_STAGE_COMPUTE_BIT, 0, program->consts.size, program->consts.data);
 	vkCmdDispatch(cmdBuffer, group_x, group_y, group_z);
 	vkEndCommandBuffer(cmdBuffer);
 	VkSubmitInfo submitInfo = {
@@ -163,15 +163,15 @@ void gpu_kernel_dispatch(GpuKernel *kernel, uint32_t group_x, uint32_t group_y, 
 	vkQueueWaitIdle(ctx->queue);
 	vkFreeCommandBuffers(ctx->device, ctx->cmdPool,1,&cmdBuffer);
 }
-void gpu_kernel_destroy(GpuKernel *kernel) {
-	GpuContext *ctx = kernel->ctx;
-	vkDestroyDescriptorSetLayout(ctx->device,kernel->descriptorSetLayout, NULL);
-	vkDestroyDescriptorPool(ctx->device, kernel->descriptorPool, NULL);
-	vkDestroyPipelineLayout(ctx->device, kernel->pipelineLayout, NULL);
-	vkDestroyPipeline(ctx->device, kernel->pipeline, NULL);
-	vkDestroyShaderModule(ctx->device, kernel->shaderModule, NULL);
-	if(kernel->consts.data) free(kernel->consts.data);
-	free(kernel);
+void gpu_program_destroy(GpuProgram *program) {
+	GpuContext *ctx = program->ctx;
+	vkDestroyDescriptorSetLayout(ctx->device,program->descriptorSetLayout, NULL);
+	vkDestroyDescriptorPool(ctx->device, program->descriptorPool, NULL);
+	vkDestroyPipelineLayout(ctx->device, program->pipelineLayout, NULL);
+	vkDestroyPipeline(ctx->device, program->pipeline, NULL);
+	vkDestroyShaderModule(ctx->device, program->shaderModule, NULL);
+	if(program->consts.data) free(program->consts.data);
+	free(program);
 }
 void gpu_const_push_ex(GpuConsts *consts, void* data, size_t size, size_t alignment) {
 	size_t offset = (consts->size + (alignment-1))&~(alignment-1);

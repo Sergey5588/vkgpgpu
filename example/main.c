@@ -12,8 +12,8 @@ int main() {
 	gpu_buf_map(buf1,(void**)&data1);
 	for(size_t i = 0; i < 1337; i++) data1[i] = i+1;
 	gpu_buf_unmap(buf1);
-	GpuKernel *k = gpu_kernel_create(ctx, "./shaders/test.comp.spv", consts, 2, buf1, buf2);
-	gpu_kernel_dispatch(k,6,1,1);
+	GpuProgram *p = gpu_program_create(ctx, "./shaders/test.comp.spv", consts, 2, buf1, buf2);
+	gpu_program_dispatch(p,6,1,1);
 	gpu_buf_map(buf2, (void**)&data2);
 	gpu_buf_map(buf1, (void**)&data1);
 	printf("First values of buf1: %f, %f, %f\n", data1[0], data1[1], data1[2]);
@@ -23,7 +23,7 @@ int main() {
 
 
 	//cleanup
-	gpu_kernel_destroy(k);
+	gpu_program_destroy(k);
 	gpu_buf_destroy(buf1);
 	gpu_buf_destroy(buf2);
 	gpu_ctx_destroy(ctx);

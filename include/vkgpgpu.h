@@ -36,7 +36,7 @@ typedef struct {
 	uint32_t bufferCount;
 	GpuBuffer **buffers;
 	GpuConsts consts;
-} GpuKernel;
+} GpuProgram;
 GpuContext* gpu_ctx_init();
 void gpu_ctx_destroy(GpuContext* ctx);
 
@@ -49,9 +49,9 @@ void gpu_buf_map(GpuBuffer *buf, void** data);
 void gpu_buf_unmap(GpuBuffer *buf);
 
 
-GpuKernel* gpu_kernel_create(GpuContext *ctx, const char* filename, GpuConsts consts, uint32_t bufferCount, ...);
-void gpu_kernel_dispatch(GpuKernel *kernel, uint32_t group_x, uint32_t group_y, uint32_t group_z);
-void gpu_kernel_destroy(GpuKernel *kernel);
+GpuProgram* gpu_program_create(GpuContext *ctx, const char* filename, GpuConsts consts, uint32_t bufferCount, ...);
+void gpu_program_dispatch(GpuProgram *program, uint32_t group_x, uint32_t group_y, uint32_t group_z);
+void gpu_program_destroy(GpuProgram *program);
 
 void gpu_const_push_ex(GpuConsts *consts, void* data, size_t size, size_t alignment);
 
