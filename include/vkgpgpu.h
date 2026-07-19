@@ -4,6 +4,10 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#define GPU_MAX_DESCRIPTOR_SETS        1024
+#define GPU_MAX_STORAGE_DESCRIPTORS    4096
+#define GPU_MAX_UNIFORM_DESCRIPTORS    1024
+
 typedef struct vkalloc GpuAlloc;
 typedef struct {
 	void* data;
@@ -16,6 +20,7 @@ typedef struct {
 	VkQueue queue;
 	uint32_t computeFamilyIndex;
 	VkCommandPool cmdPool;
+	VkDescriptorPool descriptorPool;
 } GpuContext;
 
 typedef struct {
@@ -24,36 +29,53 @@ typedef struct {
 	GpuAlloc *alloc;
 	uint64_t size;
 } GpuBuffer;
-
+typedef struct {
+	uint32_t binding;
+	GpuBuffer *buffer;
+} GpuBufferBinding;
 typedef struct {
 	GpuContext *ctx;
-	VkShaderModule shaderModule;
+//	VkShaderModule shaderModule;
 	VkPipeline pipeline;
 	VkPipelineLayout pipelineLayout;
 	VkDescriptorSetLayout descriptorSetLayout;
-	VkDescriptorPool descriptorPool;
-	VkDescriptorSet descriptorSet;
-	uint32_t bufferCount;
-	GpuBuffer **buffers;
-	GpuConsts consts;
 } GpuProgram;
+
+typedef struct {
+	GpuContext *ctx;
+	VkCommandBuffer cmdBuffer;
+	uint32_t bindingCount;
+	GpuBufferBinding *bindings;
+	GpuConsts consts;
+} GpuCommand;
+//GpuContext
 GpuContext* gpu_ctx_init();
 void gpu_ctx_destroy(GpuContext* ctx);
 
 
 
-
+//GpuBuffer
 GpuBuffer* gpu_buf_create(GpuContext *ctx, uint64_t size, uint8_t type);
 void gpu_buf_destroy(GpuBuffer *buf);
 void gpu_buf_map(GpuBuffer *buf, void** data);
 void gpu_buf_unmap(GpuBuffer *buf);
 
-
-GpuProgram* gpu_program_create(GpuContext *ctx, const char* filename, GpuConsts consts, uint32_t bufferCount, ...);
+//GpuProgram
+GpuProgram* gpu_program_create(GpuContext *ctx, const char* filename);
 void gpu_program_dispatch(GpuProgram *program, uint32_t group_x, uint32_t group_y, uint32_t group_z);
 void gpu_program_destroy(GpuProgram *program);
 
 void gpu_const_push_ex(GpuConsts *consts, void* data, size_t size, size_t alignment);
+//GpuCommand
+GpuCommand* gpu_command_begin(GpuContext *ctx);
+
+void gpu_command_bind_buffer(GpuCommand *cmd, uint64_t id, GpuBuffer* buffer);
+void gpu_command_dispatch(GpuCommand *cmd, GpuProgram *program, uint32_t group_x, uint32_t group_y, uint32_t group_z);
+
+void gpu_command_submit(GpuCommand *cmd);
+void gpu_command_destroy(GpuCommand *cmd);
+
+
 
 #define GPU_STD430_ALIGN_OF(type) _Generic((type), \
 	bool: 4, \
