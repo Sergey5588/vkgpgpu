@@ -4,16 +4,20 @@ int main() {
 	GpuContext *ctx = gpu_ctx_init();
 	GpuBuffer *buf1 = gpu_buf_create(ctx, 1337*sizeof(float), 0);
 	GpuBuffer *buf2 = gpu_buf_create(ctx, 1337*sizeof(float), 0);
-	GpuConsts consts = {0};
-	GPU_CONST_PUSH(&consts, 1.5f);
 	float *data1;
 	float *data2;
 
 	gpu_buf_map(buf1,(void**)&data1);
 	for(size_t i = 0; i < 1337; i++) data1[i] = i+1;
-	gpu_buf_unmap(buf1);
-	GpuProgram *p = gpu_program_create(ctx, "./shaders/test.comp.spv", consts, 2, buf1, buf2);
-	gpu_program_dispatch(p,6,1,1);
+
+	GpuProgram *p = gpu_program_create(ctx, "./shaders/test.comp.spv");
+
+	GpuCommand *cmd = gpu_command_begin(ctx);
+	gpu_command_bind_buffer(cmd,0, buf1);
+	gpu_command_bind_buffer(cmd,1, buf2);
+	gpu_command_dispatch(cmd, p, 7,1,1);
+	gpu_command_submit(cmd); // wait for result
+
 	gpu_buf_map(buf2, (void**)&data2);
 	gpu_buf_map(buf1, (void**)&data1);
 	printf("First values of buf1: %f, %f, %f\n", data1[0], data1[1], data1[2]);
@@ -23,6 +27,7 @@ int main() {
 
 
 	//cleanup
+	gpu_command_destroy(cmd);
 	gpu_program_destroy(p);
 	gpu_buf_destroy(buf1);
 	gpu_buf_destroy(buf2);

@@ -38,17 +38,33 @@ void gpu_command_dispatch(GpuCommand *cmd, GpuProgram *program, uint32_t group_x
 	};
 	VkDescriptorSet descriptorSet;
 	VK_CHECK(vkAllocateDescriptorSets(ctx->device, &allocSetCI, &descriptorSet));
-	VkDescriptorBufferInfo bufferInfos[bufferCount];
-	for(uint32_t i = 0; i < bufferCount; i++) {
-		bufferInfos[i] = (VkDescriptorBufferInfo){
-			.buffer = va_arg(args, GpuBuffer*)->buffer,
-			.offset = 0,
-			.range = VK_WHOLE_SIZE
-						
-		};
+	if(cmd->bindingCount > 0) {
+
+		VkDescriptorBufferInfo bufferInfos[cmd->bindingCount];
+		for(uint32_t i = 0; i < cmd->bindingCount; i++) {
+			bufferInfos[i] = (VkDescriptorBufferInfo){
+				.buffer = cmd->bindings[i].buffer->buffer,
+				.offset = 0,
+				.range = VK_WHOLE_SIZE
+							
+			};
+		}
+		VkWriteDescriptorSet writes[cmd->bindingCount];
+		for(uint32_t i = 0; i < cmd->bindingCount; i++) {
+			writes[i] = (VkWriteDescriptorSet){
+				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+				.dstSet = descriptorSet,
+				.dstBinding = cmd->bindings[i].binding,
+				.descriptorCount = 1,
+				.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+				.pBufferInfo = &bufferInfos[i]
+			};
+		}
+		vkUpdateDescriptorSets(ctx->device,cmd->bindingCount, writes,0,NULL);
 	}
 	vkCmdBindPipeline(cmd->cmdBuffer,VK_PIPELINE_BIND_POINT_COMPUTE,program->pipeline);
-	vkCmdBindDescriptorSets(cmd->cmdBuffer,VK_PIPELINE_BIND_POINT_COMPUTE,program->pipelineLayout, 0,1, ctx->descriptorPool)
+	vkCmdBindDescriptorSets(cmd->cmdBuffer,VK_PIPELINE_BIND_POINT_COMPUTE,program->pipelineLayout, 0,1, &descriptorSet, 0, NULL);
+	TODO("Push constants");
 	vkCmdDispatch(cmd->cmdBuffer, group_x, group_y, group_z);
 }
 
@@ -63,6 +79,7 @@ void gpu_command_submit(GpuCommand *cmd) {
 	};
 	VK_CHECK(vkQueueSubmit(ctx->queue, 1, &submitInfo,VK_NULL_HANDLE));
 	vkQueueWaitIdle(ctx->queue);
+	VK_CHECK(vkResetDescriptorPool(ctx->device, ctx->descriptorPool,0));
 }
 void gpu_command_destroy(GpuCommand *cmd) {
 	TODO("GpuCommand destruction");

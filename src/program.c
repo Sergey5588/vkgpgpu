@@ -82,6 +82,7 @@ GpuProgram* gpu_program_create(GpuContext *ctx, const char* filename) {
 			.size =reflectPushConstants[i]->size
 		};
 	}
+	program->pcLayout.memberCount = reflectPushConstants[0]->member_count;
 	free(reflectPushConstants);
 	VkPipelineLayoutCreateInfo pipelineLayoutCI = {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
@@ -118,20 +119,4 @@ void gpu_program_destroy(GpuProgram *program) {
 	vkDestroyPipelineLayout(ctx->device, program->pipelineLayout, NULL);
 	vkDestroyPipeline(ctx->device, program->pipeline, NULL);
 	free(program);
-}
-
-void gpu_const_push_ex(GpuConsts *consts, void* data, size_t size, size_t alignment) {
-	size_t offset = (consts->size + (alignment-1))&~(alignment-1);
-	if(size <= 0) return;
-	if(consts->size+size+offset > 128) {
-		fprintf(stderr, "Push constants limit exceeded. Max: 128 bytes, Requested: %zu bytes", consts->size+offset+size);
-		return;
-	}
-	if(consts->size == 0) {
-		consts->data = malloc(offset+size);
-	} else {
-		consts->data = realloc(consts->data, consts->size+size+offset);
-	}
-	memcpy(((uint8_t*)consts->data+offset), data, size);
-	consts->size += (size+offset);
 }
