@@ -30,7 +30,7 @@ VERSION HISTORY
 */
 #ifndef SPIRV_REFLECT_H
 #define SPIRV_REFLECT_H
-
+#define SPIRV_REFLECT_USE_SYSTEM_SPIRV_H //<-- Modified by Sergey5588
 #if defined(SPIRV_REFLECT_USE_SYSTEM_SPIRV_H)
 #include <spirv/unified1/spirv.h>
 #else

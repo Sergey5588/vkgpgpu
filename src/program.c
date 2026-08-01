@@ -6,7 +6,6 @@
 #include <stdarg.h>
 #include <string.h>
 #include "todo.h"
-#define SPIRV_REFLECT_USE_SYSTEM_SPIRV_H 1
 #include "../vendor/spirv_reflect.h"
 #include <assert.h>
 GpuProgram* gpu_program_create(GpuContext *ctx, const char* filename) {

@@ -15,7 +15,7 @@ GpuCommand* gpu_command_begin(GpuContext *ctx) {
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO
 	};
 	VK_CHECK(vkBeginCommandBuffer(cmd->cmdBuffer, &beginInfo));
-
+	cmd->ctx = ctx;
 	return cmd;
 }
 void gpu_command_bind_buffer(GpuCommand *cmd, uint64_t binding, GpuBuffer* buffer) {
@@ -60,6 +60,7 @@ void gpu_command_dispatch(GpuCommand *cmd, GpuProgram *program, uint32_t group_x
 				.pBufferInfo = &bufferInfos[i]
 			};
 		}
+		TODO("Different descriptor types");
 		vkUpdateDescriptorSets(ctx->device,cmd->bindingCount, writes,0,NULL);
 	}
 	vkCmdBindPipeline(cmd->cmdBuffer,VK_PIPELINE_BIND_POINT_COMPUTE,program->pipeline);
