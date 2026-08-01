@@ -82,6 +82,14 @@ GpuProgram* gpu_program_create(GpuContext *ctx, const char* filename) {
 		};
 	}
 	program->pcLayout.memberCount = reflectPushConstants[0]->member_count;
+	program->pcLayout.members = malloc(program->pcLayout.memberCount*sizeof(GpuPushConstantMember));
+	for(size_t i = 0; i< program->pcLayout.memberCount; ++i) {
+		program->pcLayout.members[i] = (GpuPushConstantMember){
+			.size = reflectPushConstants[0]->members[i].size,
+			.name = (char*)reflectPushConstants[0]->members[i].name,
+			.offset = reflectPushConstants[0]->members[i].offset,
+		};
+	}
 	free(reflectPushConstants);
 	VkPipelineLayoutCreateInfo pipelineLayoutCI = {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
