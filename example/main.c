@@ -12,10 +12,14 @@ int main() {
 	for(size_t i = 0; i < 1337; i++) data1[i] = i+1;
 
 	GpuProgram *p = gpu_program_create(ctx, "./shaders/test.comp.spv");
-
+	float alpha = 2.3f;
+	float beta  = 3.7f;
 	GpuCommand *cmd = gpu_command_begin(ctx);
 	gpu_command_bind_buffer(cmd,0, buf1);
 	gpu_command_bind_buffer(cmd,1, buf2);
+	
+	gpu_set(cmd, p, alpha);
+	gpu_set(cmd, p, beta);
 
 	gpu_command_dispatch(cmd, p, 7,1,1);
 	gpu_command_submit(cmd); // wait for result
