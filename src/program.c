@@ -8,6 +8,17 @@
 #include "todo.h"
 #include "../vendor/spirv_reflect.h"
 #include <assert.h>
+char *gpu_strdup(const char *str){
+    size_t len = strlen(str) + 1;
+    char *copy = malloc(len);
+
+    if (!copy)
+        return NULL;
+
+    memcpy(copy, str, len);
+
+    return copy;
+}
 GpuProgram* gpu_program_create(GpuContext *ctx, const char* filename) {
 	GpuProgram *program = calloc(1, sizeof(GpuProgram));
 	FILE *f = fopen(filename, "rb");
@@ -69,34 +80,35 @@ GpuProgram* gpu_program_create(GpuContext *ctx, const char* filename) {
 	uint32_t pcCount = 0;
 	result = spvReflectEnumeratePushConstantBlocks(&reflect, &pcCount, NULL);
 	assert(result == SPV_REFLECT_RESULT_SUCCESS);
-	SpvReflectBlockVariable **reflectPushConstants= malloc(pcCount * sizeof(SpvReflectBlockVariable*));
-	result = spvReflectEnumeratePushConstantBlocks(&reflect, &pcCount, reflectPushConstants);
-	assert(result == SPV_REFLECT_RESULT_SUCCESS);
-
-	VkPushConstantRange pushConstantRanges[pcCount];
-	for(uint32_t i = 0; i < pcCount; ++i) {
-		pushConstantRanges[i] = (VkPushConstantRange){
+	assert(pcCount <= 1);
+	VkPushConstantRange pushConstantRange;
+	if(pcCount == 1) {
+		SpvReflectBlockVariable **reflectPushConstants= malloc(pcCount * sizeof(SpvReflectBlockVariable*));
+		result = spvReflectEnumeratePushConstantBlocks(&reflect, &pcCount, reflectPushConstants);
+		assert(result == SPV_REFLECT_RESULT_SUCCESS);
+		pushConstantRange = (VkPushConstantRange){
 			.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,
-			.offset = reflectPushConstants[i]->offset,
-			.size =reflectPushConstants[i]->size
+			.offset = reflectPushConstants[0]->offset,
+			.size =reflectPushConstants[0]->size
 		};
+		program->pcLayout.memberCount = reflectPushConstants[0]->member_count;
+		program->pcLayout.members = malloc(program->pcLayout.memberCount*sizeof(GpuPushConstantMember));
+		program->pcLayout.size = reflectPushConstants[0]->size;
+		for(size_t i = 0; i< program->pcLayout.memberCount; ++i) {
+			program->pcLayout.members[i] = (GpuPushConstantMember){
+				.size = reflectPushConstants[0]->members[i].size,
+				.name = gpu_strdup(reflectPushConstants[0]->members[i].name),
+				.offset = reflectPushConstants[0]->members[i].offset,
+			};
+		}
+		free(reflectPushConstants);
 	}
-	program->pcLayout.memberCount = reflectPushConstants[0]->member_count;
-	program->pcLayout.members = malloc(program->pcLayout.memberCount*sizeof(GpuPushConstantMember));
-	for(size_t i = 0; i< program->pcLayout.memberCount; ++i) {
-		program->pcLayout.members[i] = (GpuPushConstantMember){
-			.size = reflectPushConstants[0]->members[i].size,
-			.name = (char*)reflectPushConstants[0]->members[i].name,
-			.offset = reflectPushConstants[0]->members[i].offset,
-		};
-	}
-	free(reflectPushConstants);
 	VkPipelineLayoutCreateInfo pipelineLayoutCI = {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 		.setLayoutCount = 1,
 		.pSetLayouts = &program->descriptorSetLayout,
 		.pushConstantRangeCount = pcCount,
-		.pPushConstantRanges = pushConstantRanges,
+		.pPushConstantRanges = pcCount ? &pushConstantRange : NULL,
 	};
 	VkPipelineLayout pipelineLayout;
 	VK_CHECK(vkCreatePipelineLayout(ctx->device, &pipelineLayoutCI, NULL, &pipelineLayout));
@@ -117,10 +129,15 @@ GpuProgram* gpu_program_create(GpuContext *ctx, const char* filename) {
 	program->pipeline = pipeline;
 	program->pipelineLayout = pipelineLayout;
 	vkDestroyShaderModule(ctx->device, shaderModule, NULL);
+	spvReflectDestroyShaderModule(&reflect);
 	return program;
 }
 void gpu_program_destroy(GpuProgram *program) {
 	GpuContext *ctx = program->ctx;
+	for (uint32_t i =0; i < program->pcLayout.memberCount; ++i) {
+		free(program->pcLayout.members[i].name);
+	}
+	free(program->pcLayout.members);
 	vkDestroyDescriptorSetLayout(ctx->device,program->descriptorSetLayout, NULL);
 	//vkDestroyDescriptorPool(ctx->device, program->descriptorPool, NULL);
 	vkDestroyPipelineLayout(ctx->device, program->pipelineLayout, NULL);
