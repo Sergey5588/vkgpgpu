@@ -2,6 +2,7 @@
 #include "../include/vkgpgpu.h"
 #include <stdlib.h>
 #include "todo.h"
+#include "string.h"
 GpuCommand* gpu_command_begin(GpuContext *ctx) {
 	GpuCommand* cmd = calloc(1, sizeof(GpuCommand));
 	VkCommandBufferAllocateInfo cmdBufAllocCI = {
@@ -65,10 +66,30 @@ void gpu_command_dispatch(GpuCommand *cmd, GpuProgram *program, uint32_t group_x
 	}
 	vkCmdBindPipeline(cmd->cmdBuffer,VK_PIPELINE_BIND_POINT_COMPUTE,program->pipeline);
 	vkCmdBindDescriptorSets(cmd->cmdBuffer,VK_PIPELINE_BIND_POINT_COMPUTE,program->pipelineLayout, 0,1, &descriptorSet, 0, NULL);
-	TODO("Push constants");
+	vkCmdPushConstants(cmd->cmdBuffer, program->pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, cmd->pushConstants->size, cmd->pushConstants->data);
 	vkCmdDispatch(cmd->cmdBuffer, group_x, group_y, group_z);
 }
+void gpu_command_set_constant_ex(GpuCommand *cmd, GpuProgram *prog, char* name, void* data) {
 
+	if(!cmd->pushConstants) {
+		cmd->pushConstants = calloc(1, sizeof(GpuPushConstants));
+		cmd->pushConstants->data = malloc(prog->pcLayout.size);
+		cmd->pushConstants->size = prog->pcLayout.size;
+	}
+	GpuPushConstantMember *member;
+	bool found = 0;
+	for(size_t i = 0; i < prog->pcLayout.memberCount; ++i) {
+		if(strcmp(prog->pcLayout.members[i].name, name) == 0) {
+			member = &prog->pcLayout.members[i];
+			found = 1;
+		}
+	}
+	if(!found) {
+		fprintf(stderr, "Field not found: %s\n", name);
+		return;
+	}
+	memcpy(cmd->pushConstants->data + member->offset, data,member->size);
+}
 void gpu_command_submit(GpuCommand *cmd) {
 
 	GpuContext *ctx = cmd->ctx;

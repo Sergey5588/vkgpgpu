@@ -84,6 +84,8 @@ void gpu_program_destroy(GpuProgram *program);
 GpuCommand* gpu_command_begin(GpuContext *ctx);
 
 void gpu_command_bind_buffer(GpuCommand *cmd, uint64_t id, GpuBuffer* buffer);
+void gpu_command_set_constant_ex(GpuCommand *cmd, GpuProgram *prog, char* name, void* data);
+#define gpu_set(cmd, p, var) gpu_command_set_constant_ex(cmd, p, #var, &(var))
 void gpu_command_dispatch(GpuCommand *cmd, GpuProgram *program, uint32_t group_x, uint32_t group_y, uint32_t group_z);
 
 void gpu_command_submit(GpuCommand *cmd);

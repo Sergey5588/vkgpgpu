@@ -56,6 +56,7 @@ GpuProgram* gpu_program_create(GpuContext *ctx, const char* filename) {
 	result = spvReflectEnumerateDescriptorBindings(&reflect, &bindingCount, reflectBindings);
 	assert(result == SPV_REFLECT_RESULT_SUCCESS);
 	VkDescriptorSetLayoutBinding bindings[bindingCount];
+	TODO("Remove VLA");
 	for(uint32_t i=0; i < bindingCount; i++) {
 		SpvReflectDescriptorBinding* refl = reflectBindings[i];
 		bindings[i] = (VkDescriptorSetLayoutBinding){
