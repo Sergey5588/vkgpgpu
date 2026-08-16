@@ -4,7 +4,7 @@
 
 #include "../vendor/vkalloc.h"
 
-GpuBuffer* gpu_buf_create(GpuContext *ctx, uint64_t size, uint8_t type) {
+GpuBuffer* gpu_buf_create(GpuContext *ctx, uint64_t size, GpuMemType type) {
 	GpuBuffer* buf = calloc(1, sizeof(GpuBuffer));
 	buf->ctx = ctx;
 	buf->size = size;
@@ -14,7 +14,7 @@ GpuBuffer* gpu_buf_create(GpuContext *ctx, uint64_t size, uint8_t type) {
 		.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
 		.sharingMode = VK_SHARING_MODE_EXCLUSIVE
 	};
-	vkalloc_create_buffer(&bufferCI,type, &buf->buffer,  (struct vkalloc**)&buf->alloc);
+	vkalloc_create_buffer(&bufferCI, (enum mem_type)type, &buf->buffer,  (struct vkalloc**)&buf->alloc);
 	return buf;
 }
 void gpu_buf_destroy(GpuBuffer *buf) {

@@ -8,6 +8,11 @@
 #define GPU_MAX_STORAGE_DESCRIPTORS    4096
 #define GPU_MAX_UNIFORM_DESCRIPTORS    1024
 
+
+typedef enum gpu_mem_type {
+	MEM_STAGING, /* Memory that is accessible from the CPU and GPU */
+	MEM_GPU      /* Memory that is only available from the GPU */
+} GpuMemType;
 typedef struct vkalloc GpuAlloc;
 
 typedef struct {
@@ -71,7 +76,7 @@ void gpu_ctx_destroy(GpuContext* ctx);
 
 
 //GpuBuffer
-GpuBuffer* gpu_buf_create(GpuContext *ctx, uint64_t size, uint8_t type);
+GpuBuffer* gpu_buf_create(GpuContext *ctx, uint64_t size, GpuMemType type);
 void gpu_buf_destroy(GpuBuffer *buf);
 void gpu_buf_map(GpuBuffer *buf, void** data);
 void gpu_buf_unmap(GpuBuffer *buf);
