@@ -2,8 +2,8 @@
 #include <stdio.h>
 int main() {
 	GpuContext *ctx = gpu_ctx_init();
-	GpuBuffer *buf1 = gpu_buf_create(ctx, 1337*sizeof(float), 0);
-	GpuBuffer *buf2 = gpu_buf_create(ctx, 1337*sizeof(float), 0);
+	GpuBuffer *buf1 = gpu_buf_create(ctx, 1337*sizeof(float), MEM_STAGING);
+	GpuBuffer *buf2 = gpu_buf_create(ctx, 1337*sizeof(float), MEM_STAGING);
 	float *data1;
 	float *data2;
 
