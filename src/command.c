@@ -104,5 +104,11 @@ void gpu_command_submit(GpuCommand *cmd) {
 	VK_CHECK(vkResetDescriptorPool(ctx->device, ctx->descriptorPool,0));
 }
 void gpu_command_destroy(GpuCommand *cmd) {
-	TODO("GpuCommand destruction");
+	vkFreeCommandBuffers(cmd->ctx->device, cmd->ctx->cmdPool, 1,&cmd->cmdBuffer);
+	if(cmd->bindings) free(cmd->bindings);
+	if(cmd->pushConstants) {
+		if(cmd->pushConstants->data) free(cmd->pushConstants->data);
+		free(cmd->pushConstants);
+	}
+	if(cmd) free(cmd);
 }
