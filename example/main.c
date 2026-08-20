@@ -11,7 +11,7 @@ int main() {
 	gpu_buf_map(buf2, (void**)&data2);
 	for(size_t i = 0; i < 1337; i++) data1[i] = i+1;
 
-	GpuProgram *p = gpu_program_create(ctx, "./shaders/test.comp.spv");
+	GpuProgram *p = gpu_program_load(ctx, "./shaders/test.comp.spv");
 	float alpha = 2.3f;
 	float beta  = 3.7f;
 	GpuCommand *cmd = gpu_command_begin(ctx);
