@@ -82,7 +82,8 @@ void gpu_buf_map(GpuBuffer *buf, void** data);
 void gpu_buf_unmap(GpuBuffer *buf);
 
 //GpuProgram
-GpuProgram* gpu_program_create(GpuContext *ctx, const char* filename);
+GpuProgram* gpu_program_create(GpuContext *ctx, void* shaderCode, uint64_t shaderSize);
+GpuProgram* gpu_program_load(GpuContext *ctx, const char* filename);
 void gpu_program_destroy(GpuProgram *program);
 
 //GpuCommand
