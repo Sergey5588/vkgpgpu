@@ -19,25 +19,33 @@ char *gpu_strdup(const char *str){
 
     return copy;
 }
-GpuProgram* gpu_program_create(GpuContext *ctx, const char* filename) {
-	GpuProgram *program = calloc(1, sizeof(GpuProgram));
+uint64_t gpu_read_file(const char* filename, void** out) {
 	FILE *f = fopen(filename, "rb");
 	if(f == NULL) {
 		fprintf(stderr, "Failed to open file: %s\n", filename);
-		return NULL;
+		abort();
 	}
 	fseek(f, 0, SEEK_END);
-	size_t shaderSize = ftell(f);
+	uint64_t fileSize = ftell(f);
+	*out = malloc(fileSize);
+	if(*out == NULL) {
+		fclose(f);
+		abort();
+	}
+	rewind(f);
+	fread(*out, 1, fileSize, f);
+	fclose(f);
+	return fileSize;
+}
+GpuProgram* gpu_program_create(GpuContext *ctx, const char* filename) {
+	GpuProgram *program = calloc(1, sizeof(GpuProgram));
+	uint32_t *shaderCode;
+	uint64_t shaderSize = gpu_read_file(filename, (void**)&shaderCode);
 	if(shaderSize <= 0 || shaderSize%4 !=0) {
 		fprintf(stderr, "Bad SPIR-V size.\n");
-		fclose(f);
-		return NULL;
+		abort();
 	}
-	uint32_t *shaderCode = malloc(shaderSize);
-	rewind(f);
-	fread(shaderCode, 1,shaderSize,f);
 	printf("First SPIR-V dword: 0x%08x\n", shaderCode[0]);
-	fclose(f);
 	VkShaderModuleCreateInfo shaderCI = {
 		.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
 		.codeSize = shaderSize, 
