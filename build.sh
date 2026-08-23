@@ -1,7 +1,20 @@
 #!/bin/sh
-TARGET="app"
+TARGET="test"
+LIB="libvkgpgpu.so"
+STATIC="vkgpgpu.a"
+
 CFLAGS="-std=c11"
-build() {
+
+build_static() {
+	cc $CFLAGS -c $(find . -name "*.c" ! -path "./example/main.c" -path "./*/*")
+	ar rcs $STATIC *.o
+	rm -f *.o
+
+}
+build_shared() {
+	cc $CFLAGS -fPIC -shared $(find . -name "*.c" ! -path "./example/main.c" -path "./*/*") -o $LIB
+}
+build_example() {
 
 	cc "$CFLAGS" ./*/*.c -o $TARGET
 }
@@ -16,15 +29,21 @@ build_glsl() {
 
 ACTION="$1"
 if [ -z "$ACTION" ]; then
-	ACTION="build"
+	ACTION="example"
 fi
 
 case "$ACTION" in
-	build)
-		build
+	shared)
+		build_shared
+		;;
+	static)
+		build_static
+		;;
+	example)
+		build_example
 		;;
 	run)
-		build
+		build_example
 		build_glsl
 		./$TARGET
 		;;
@@ -33,6 +52,11 @@ case "$ACTION" in
 		;;
 	glsl)
 		build_glsl
+		;;
+	clean)
+		rm $TARGET
+		rm $LIB
+		rm $STATIC
 		;;
 	*)
 		echo "Error: Unknown command '$ACTION'"
