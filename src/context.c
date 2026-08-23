@@ -116,6 +116,7 @@ GpuContext* gpu_ctx_init() {
 }
 
 void gpu_ctx_destroy(GpuContext* ctx) {
+	vkDestroyDescriptorPool(ctx->device, ctx->descriptorPool, NULL);
 	vkDestroyCommandPool(ctx->device,ctx->cmdPool,NULL);
 	vkalloc_destroy();
 	vkDestroyDevice(ctx->device, NULL);
