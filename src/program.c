@@ -90,7 +90,7 @@ GpuProgram* gpu_program_create(GpuContext *ctx, void* shaderCode, uint64_t shade
 		.pBindings = bindingCount > 0 ?  bindings : NULL,
 	};
 	VK_CHECK(vkCreateDescriptorSetLayout(ctx->device, &dsLayoutCI, NULL, &program->descriptorSetLayout));
-
+	free(bindings);
 	uint32_t pcCount = 0;
 	result = spvReflectEnumeratePushConstantBlocks(&reflect, &pcCount, NULL);
 	assert(result == SPV_REFLECT_RESULT_SUCCESS);
