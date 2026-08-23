@@ -48,7 +48,6 @@ GpuProgram* gpu_program_load(GpuContext *ctx, const char* filename) {
 }
 GpuProgram* gpu_program_create(GpuContext *ctx, void* shaderCode, uint64_t shaderSize) {
 	GpuProgram *program = calloc(1, sizeof(GpuProgram));
-	printf("First SPIR-V dword: 0x%08x\n", ((uint8_t*)shaderCode)[0]);
 	VkShaderModuleCreateInfo shaderCI = {
 		.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
 		.codeSize = shaderSize, 
@@ -66,26 +65,29 @@ GpuProgram* gpu_program_create(GpuContext *ctx, void* shaderCode, uint64_t shade
 	SpvReflectDescriptorBinding **reflectBindings = malloc(bindingCount * sizeof(SpvReflectDescriptorBinding*));
 	result = spvReflectEnumerateDescriptorBindings(&reflect, &bindingCount, reflectBindings);
 	assert(result == SPV_REFLECT_RESULT_SUCCESS);
-	VkDescriptorSetLayoutBinding bindings[bindingCount];
-	TODO("Remove VLA");
-	for(uint32_t i=0; i < bindingCount; i++) {
-		SpvReflectDescriptorBinding* refl = reflectBindings[i];
-		bindings[i] = (VkDescriptorSetLayoutBinding){
-			.binding = refl->binding,
-			.descriptorType = (VkDescriptorType)refl->descriptor_type,
-			.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,
-		};
-		uint32_t descCount = 1;
-		if (refl->type_description && refl->type_description->traits.array.dims_count > 0) {
-			descCount = refl->type_description->traits.array.dims[0];
+	VkDescriptorSetLayoutBinding *bindings = NULL;
+	if(bindingCount > 0) {
+		
+		bindings = malloc(sizeof(VkDescriptorSetLayoutBinding)*bindingCount);
+		for(uint32_t i=0; i < bindingCount; i++) {
+			SpvReflectDescriptorBinding* refl = reflectBindings[i];
+			bindings[i] = (VkDescriptorSetLayoutBinding){
+				.binding = refl->binding,
+				.descriptorType = (VkDescriptorType)refl->descriptor_type,
+				.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,
+			};
+			uint32_t descCount = 1;
+			if (refl->type_description && refl->type_description->traits.array.dims_count > 0) {
+				descCount = refl->type_description->traits.array.dims[0];
+			}
+			bindings[i].descriptorCount = descCount;
 		}
-		bindings[i].descriptorCount = descCount;
 	}
 	free(reflectBindings);
 	VkDescriptorSetLayoutCreateInfo dsLayoutCI = {
 		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
 		.bindingCount = bindingCount,
-		.pBindings = bindings,
+		.pBindings = bindingCount > 0 ?  bindings : NULL,
 	};
 	VK_CHECK(vkCreateDescriptorSetLayout(ctx->device, &dsLayoutCI, NULL, &program->descriptorSetLayout));
 
