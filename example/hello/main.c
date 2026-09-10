@@ -1,4 +1,4 @@
-#include "../include/vkgpgpu.h"
+#include "../../include/vkgpgpu.h"
 #include <stdio.h>
 int main() {
 	GpuContext *ctx = gpu_ctx_init();

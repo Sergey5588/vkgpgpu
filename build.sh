@@ -6,21 +6,21 @@ STATIC="vkgpgpu.a"
 CFLAGS="-std=c11"
 
 build_static() {
-	cc $CFLAGS -c $(find . -name "*.c" ! -path "./example/main.c" -path "./*/*")
+	cc $CFLAGS -c ./*/*.c
 	ar rcs $STATIC *.o
 	rm -f *.o
 
 }
 build_shared() {
-	cc $CFLAGS -fPIC -shared $(find . -name "*.c" ! -path "./example/main.c" -path "./*/*") -o $LIB
+	cc $CFLAGS -fPIC -shared ./*/*.c -o $LIB
 }
 build_example() {
 
-	cc $CFLAGS ./*/*.c -o $TARGET
+	cc $CFLAGS ./*/*.c "./example/hello/main.c" -o $TARGET
 }
 build_debug() {
 
-	cc $CFLAGS -g  -O1 -fsanitize=address -fno-omit-frame-pointer -Wall -Wextra ./*/*.c -o $TARGET
+	cc $CFLAGS -g  -O1 -fsanitize=address -fno-omit-frame-pointer -Wall -Wextra ./*/*.c "./example/hello/main.c" -o $TARGET
 }
 build_glsl() {
 	glslangValidator -V --target-env vulkan1.3 -S comp shaders/test.comp -o shaders/test.comp.spv
