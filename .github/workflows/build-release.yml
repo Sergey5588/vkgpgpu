@@ -1,0 +1,67 @@
+name: Build and release lib
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build .so
+        run: |
+          gcc -shared -fPIC -DVKGPGPU_BUILD -o libvkgpgpu.so ./*/*.c
+
+      - name: Upload linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libvkgpgpu-linux
+          path: libvkgpgpu.so
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build DLL
+        shell: bash
+        run: |
+          gcc -shared -o vkgpgpu.dll ./*/*.c -Wl,--out-implib,libmylib.a
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vkgpgpu-windows
+          path: | 
+            vkgpgpu.dll
+            libvkgpgpu.a
+
+  release:
+    needs: [build-linux, build-windows] # Ждём завершения сборок
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write 
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: true 
+          files: |
+            artifacts/libvkgpgpu-linux/libvkgpgpu.so
+            artifacts/vkgpgpu-windows/vkgpgpu.dll
+            artifacts/vkgpgpu-windows/libvkgpgpu.dll
