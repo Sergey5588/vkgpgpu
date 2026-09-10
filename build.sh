@@ -60,7 +60,7 @@ case "$ACTION" in
 		;;
 	*)
 		echo "Error: Unknown command '$ACTION'"
-		echo "Usage: $0 [build|example|debug|glsl|shared|static]"
+		echo "Usage: $0 [build|example|debug|glsl|shared|static|clean]"
 		;;
 
 esac
