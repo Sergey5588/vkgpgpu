@@ -16,11 +16,11 @@ build_shared() {
 }
 build_example() {
 
-	cc "$CFLAGS" ./*/*.c -o $TARGET
+	cc $CFLAGS ./*/*.c -o $TARGET
 }
 build_debug() {
 
-	cc "$CFLAGS" -g  -O1 -fsanitize=address -fno-omit-frame-pointer -Wall -Wextra ./*/*.c -o $TARGET
+	cc $CFLAGS -g  -O1 -fsanitize=address -fno-omit-frame-pointer -Wall -Wextra ./*/*.c -o $TARGET
 }
 build_glsl() {
 	glslangValidator -V --target-env vulkan1.3 -S comp shaders/test.comp -o shaders/test.comp.spv
@@ -60,7 +60,7 @@ case "$ACTION" in
 		;;
 	*)
 		echo "Error: Unknown command '$ACTION'"
-		echo "Usage: $0 [build|run|debug|glsl]"
+		echo "Usage: $0 [build|example|debug|glsl|shared|static]"
 		;;
 
 esac
