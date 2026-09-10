@@ -1,6 +1,6 @@
 #include "../vendor/volk.h"
 #include "vk_helper.h"
-#include "../include/vkgpgpu.h"
+#include "vkgpgpu_internal.h"
 
 #include "../vendor/vkalloc.h"
 

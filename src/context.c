@@ -1,5 +1,5 @@
 #include "../vendor/volk.h"
-#include "../include/vkgpgpu.h"
+#include "vkgpgpu_internal.h"
 #include "vk_helper.h"
 #include "todo.h"
 

@@ -1,5 +1,5 @@
 #include "vk_helper.h"
-#include "../include/vkgpgpu.h"
+#include "vkgpgpu_internal.h"
 #include <stdlib.h>
 #include "todo.h"
 #include "string.h"
