@@ -4,10 +4,12 @@ int main() {
 	GpuContext *ctx = gpu_ctx_init();
 	GpuBuffer *buffer = gpu_buf_create(ctx, 1337*sizeof(float), MEM_STAGING);
 	float *data;
+
 	gpu_buf_map(buffer,(void**)&data);
 	for(size_t i = 0; i < 1337; i++) data[i] = i+1; // fill data
 	printf("Sent to GPU: %f, %f, %f ...\n", data[0], data[1], data[2]);
-	
+	gpu_buf_unmap(buffer);
+
 	GpuProgram *p = gpu_program_load(ctx, "./shaders/test.comp.spv"); // load shader from disk
 	float alpha = 67.0f;
 
@@ -19,7 +21,9 @@ int main() {
 	gpu_command_dispatch(cmd, p, 7,1,1);
 	gpu_command_submit(cmd); // wait for result
 
+	gpu_buf_map(buffer,(void**)&data);
 	printf("Got: %f, %f, %f\n", data[0], data[1], data[2]); // Expected 67.000000, 134.000000, 201.000000
+	gpu_buf_unmap(buffer);
 
 	//cleanup
 	gpu_command_destroy(cmd);
