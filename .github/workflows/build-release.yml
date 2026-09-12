@@ -40,7 +40,7 @@ jobs:
       - name: Build DLL
         shell: bash
         run: |
-          gcc -shared -Iexternal/Vulkan-Headers/include -o vkgpgpu.dll ./*/*.c -Wl,--out-implib,libmylib.a
+          gcc -shared -Iexternal/Vulkan-Headers/include -o vkgpgpu.dll ./*/*.c -Wl,--out-implib,vkgpgpu.lib
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
@@ -48,7 +48,7 @@ jobs:
           name: vkgpgpu-windows
           path: | 
             vkgpgpu.dll
-            libvkgpgpu.a
+            vkgpgpu.lib
             include/vkgpgpu.h
 
   release:
@@ -74,6 +74,6 @@ jobs:
           draft: true 
           files: |
             artifacts/libvkgpgpu-linux/libvkgpgpu.so
-            artifacts/libvkgpgpu-linux/vkgpgpu.h
+            artifacts/libvkgpgpu-linux/include/vkgpgpu.h
             artifacts/vkgpgpu-windows/vkgpgpu.dll
-            artifacts/vkgpgpu-windows/libvkgpgpu.a
+            artifacts/vkgpgpu-windows/vkgpgpu.lib
