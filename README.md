@@ -60,7 +60,9 @@ gpu_ctx_destroy(ctx);
 - [volk.h](https://github.com/zeux/volk): vulkan loading at runtime (included in `vendor/`)
 - [vkalloc](https://sr.ht/~lmarz/vkalloc/): simple vulkan memory allocator (included in `vendor/`)
 - [SPIRV-Reflect](https://github.com/KhronosGroup/SPIRV-Reflect): for shader reflection (included in `vendor/`)
-- [Vulkan-Headers](https://github.com/KhronosGroup/Vulkan-Headers): only at build time, vulkan-1.dll and libvulkan.so loads at runtime.
+- [Vulkan-Headers](https://github.com/KhronosGroup/Vulkan-Headers): only at build time
 - Any C11 compliant C compiler (gcc, clang, MSVC)
 - Any SPIR-V compiler
 
+## License
+MIT — see [LICENSE](LICENSE).
