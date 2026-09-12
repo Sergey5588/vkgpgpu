@@ -37,7 +37,7 @@ jobs:
       - name: Build DLL
         shell: bash
         run: |
-          gcc -shared -o -Iexternal/Vulkan-Headers/include vkgpgpu.dll ./*/*.c -Wl,--out-implib,libmylib.a
+          gcc -shared -Iexternal/Vulkan-Headers/include -o vkgpgpu.dll ./*/*.c -Wl,--out-implib,libmylib.a
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
