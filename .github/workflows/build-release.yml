@@ -23,7 +23,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: libvkgpgpu-linux
-          path: libvkgpgpu.so
+          path: |
+            libvkgpgpu.so
+            include/vkgpgpu.h
+
   build-windows:
     runs-on: windows-latest
     steps:
@@ -46,6 +49,7 @@ jobs:
           path: | 
             vkgpgpu.dll
             libvkgpgpu.a
+            include/vkgpgpu.h
 
   release:
     needs: [build-linux, build-windows]
