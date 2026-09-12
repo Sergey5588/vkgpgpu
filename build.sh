@@ -25,6 +25,9 @@ build_debug() {
 build_glsl() {
 	glslangValidator -V --target-env vulkan1.3 -S comp shaders/test.comp -o shaders/test.comp.spv
 }
+usage() {
+	echo "Usage: $0 [build|example|debug|glsl|shared|static|clean]"
+}
 
 
 ACTION="$1"
@@ -54,13 +57,16 @@ case "$ACTION" in
 		build_glsl
 		;;
 	clean)
-		rm $TARGET
-		rm $LIB
-		rm $STATIC
+		rm -f $TARGET
+		rm -f $LIB
+		rm -f $STATIC
+		;; 
+	help)
+		usage
 		;;
 	*)
 		echo "Error: Unknown command '$ACTION'"
-		echo "Usage: $0 [build|example|debug|glsl|shared|static|clean]"
+		usage
 		;;
 
 esac
