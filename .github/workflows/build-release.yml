@@ -12,10 +12,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+      - name: Get Vulkan-Headers
+        run: |
+          git clone --depth 1 https://github.com/KhronosGroup/Vulkan-Headers.git external/Vulkan-Headers
       - name: Build .so
         run: |
-          gcc -shared -fPIC -DVKGPGPU_BUILD -o libvkgpgpu.so ./*/*.c
+          gcc -shared -fPIC -DVKGPGPU_BUILD -Iexternal/Vulkan-Headers/include -o libvkgpgpu.so ./*/*.c
 
       - name: Upload linux artifact
         uses: actions/upload-artifact@v4
@@ -28,10 +30,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Get Vulkan-Headers
+        run: |
+          git clone --depth 1 https://github.com/KhronosGroup/Vulkan-Headers.git external/Vulkan-Headers
+
       - name: Build DLL
         shell: bash
         run: |
-          gcc -shared -o vkgpgpu.dll ./*/*.c -Wl,--out-implib,libmylib.a
+          gcc -shared -o -Iexternal/Vulkan-Headers/include vkgpgpu.dll ./*/*.c -Wl,--out-implib,libmylib.a
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
@@ -42,7 +48,7 @@ jobs:
             libvkgpgpu.a
 
   release:
-    needs: [build-linux, build-windows] # Ждём завершения сборок
+    needs: [build-linux, build-windows]
     runs-on: ubuntu-latest
     permissions:
       contents: write 
