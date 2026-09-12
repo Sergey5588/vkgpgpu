@@ -74,5 +74,6 @@ jobs:
           draft: true 
           files: |
             artifacts/libvkgpgpu-linux/libvkgpgpu.so
+            artifacts/libvkgpgpu-linux/vkgpgpu.h
             artifacts/vkgpgpu-windows/vkgpgpu.dll
-            artifacts/vkgpgpu-windows/libvkgpgpu.dll
+            artifacts/vkgpgpu-windows/libvkgpgpu.a
