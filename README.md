@@ -36,7 +36,8 @@ gpu_command_dispatch(cmd, p, 7,1,1);
 gpu_command_submit(cmd); // wait for result
 
 gpu_buf_map(buffer,(void**)&data);
-printf("Got: %f, %f, %f\n", data[0], data[1], data[2]); // Expected 67.000000, 134.000000, 201.000000
+printf("Got: %f, %f, %f\n", data[0], data[1], data[2]);
+// Expected 67.000000, 134.000000, 201.000000
 gpu_buf_unmap(buffer);
 
 //cleanup
