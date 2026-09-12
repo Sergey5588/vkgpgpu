@@ -20,7 +20,7 @@ build_example() {
 }
 build_debug() {
 
-	cc $CFLAGS -g  -O1 -fsanitize=address -fno-omit-frame-pointer -Wall -Wextra ./*/*.c "./example/hello/main.c" -o $TARGET
+	cc $CFLAGS -DVKGPGPU_DEBUG -g  -O1 -fsanitize=address -fno-omit-frame-pointer -Wall -Wextra ./*/*.c "./example/hello/main.c" -o $TARGET
 }
 build_glsl() {
 	glslangValidator -V --target-env vulkan1.3 -S comp shaders/test.comp -o shaders/test.comp.spv

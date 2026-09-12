@@ -45,7 +45,9 @@ GpuContext* gpu_ctx_init() {
 	
 	VkPhysicalDeviceProperties2 deviceProperties = { .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};
 	vkGetPhysicalDeviceProperties2(ctx->physicalDevice, &deviceProperties);
+#ifdef VKGPGPU_DEBUG
 	printf("Running on: %s\n", deviceProperties.properties.deviceName);
+#endif
 	free(physicalDevices);
 	//queue setup
 	uint32_t queueFamilyPropertiesCount = 0;
