@@ -6,13 +6,13 @@ STATIC="vkgpgpu.a"
 CFLAGS="-std=c11"
 
 build_static() {
-	cc $CFLAGS -c ./*/*.c
+	cc $CFLAGS -DVKGPGPU_BUILD -c ./*/*.c
 	ar rcs $STATIC *.o
 	rm -f *.o
 
 }
 build_shared() {
-	cc $CFLAGS -fPIC -shared ./*/*.c -o $LIB
+	cc $CFLAGS -DVKGPGPU_BUILD -fPIC -shared ./*/*.c -o $LIB
 }
 build_example() {
 
