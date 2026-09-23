@@ -5,7 +5,7 @@ A minimalist, lightweight framework for general-purpose computing on the GPU, wr
 
 Prebuilt binaries are available on the [Releases](../../releases) page.
 
-Compile from source:
+Compile from source (Vulkan Headers needed):
 ```bash
 git clone https://github.com/Sergey5588/vkgpgpu
 cd vkgpgpu
