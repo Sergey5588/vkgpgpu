@@ -1,5 +1,5 @@
 # VKGPGPU
-A minimalist, lightweight framework for general-purpose computing on the GPU, written in pure C11 on top of Vulkan.
+A minimalist, lightweight framework for general-purpose computing on the GPU (like CUDA or OpenCL), written in pure C11 on top of Vulkan.
 
 ## Quick start
 
