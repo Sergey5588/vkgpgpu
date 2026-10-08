@@ -47,7 +47,7 @@ gpu_buf_destroy(buffer);
 gpu_ctx_destroy(ctx);
 //...
 ```
-
+This code loads a shader that multiplies every number inside an array by a constant alpha that is passed via push constants.
 
 
 ## Features
